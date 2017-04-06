@@ -1318,6 +1318,7 @@ class Model(Container):
                                  str(x[0].shape[0]) + ' samples')
         return x, y, sample_weights
 
+
     def fit(self, x=None,
             y=None,
             batch_size=32,

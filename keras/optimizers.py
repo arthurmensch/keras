@@ -369,7 +369,9 @@ class Adam(Optimizer):
     def __init__(self, lr=0.001, beta_1=0.9, beta_2=0.999,
                  epsilon=1e-8, decay=0., **kwargs):
         super(Adam, self).__init__(**kwargs)
-        self.iterations = K.variable(0, name='iterations')
+        #        self.iterations = K.variable(0)
+        # TS 20170208 bugfix : save_model + load_model not working after training
+        self.iterations = K.variable(0, name='adam_iter')
         self.lr = K.variable(lr, name='lr')
         self.beta_1 = K.variable(beta_1, name='beta_1')
         self.beta_2 = K.variable(beta_2, name='beta_2')
@@ -390,8 +392,13 @@ class Adam(Optimizer):
                      (1. - K.pow(self.beta_1, t)))
 
         shapes = [K.get_variable_shape(p) for p in params]
-        ms = [K.zeros(shape) for shape in shapes]
-        vs = [K.zeros(shape) for shape in shapes]
+        # TS 20170208 bugfix : save_model + load_model not working after training
+        #        ms = [K.zeros(shape) for shape in shapes]
+        ms = [K.zeros(shape, name='adam_p_ms_' + str(p.name)) for p, shape in
+              zip(params, shapes)]
+        #        vs = [K.zeros(shape) for shape in shapes]
+        vs = [K.zeros(shape, name='adam_p_vs_' + str(p.name)) for p, shape in
+              zip(params, shapes)]
         self.weights = [self.iterations] + ms + vs
 
         for p, g, m, v in zip(params, grads, ms, vs):
